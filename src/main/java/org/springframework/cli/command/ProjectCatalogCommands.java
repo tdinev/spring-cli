@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 the original author or authors.
+ * Copyright 2022-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.util.FileSystemUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-@Command(command = "project-catalog", group = "Project Catalog")
+@Command(command = "project catalog", group = "Project Catalog")
 public class ProjectCatalogCommands extends AbstractSpringCliCommands {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectCatalogCommands.class);
@@ -76,7 +76,7 @@ public class ProjectCatalogCommands extends AbstractSpringCliCommands {
 		this.objectMapper = objectMapper;
 	}
 
-	@Command(command = "list-available", description = "List available catalogs")
+	@Command(command = "available", description = "List available catalogs")
 	public Object catalogListAvailable(
 			@Option(description = "JSON format output", required = false, defaultValue = "false") boolean json)
 			throws JsonProcessingException {
@@ -149,7 +149,7 @@ public class ProjectCatalogCommands extends AbstractSpringCliCommands {
 		return tableBuilder.addFullBorder(BorderStyle.fancy_light).build();
 	}
 
-	@Command(command = "add", description = "Add a project to a project catalog")
+	@Command(command = "add", description = "Add a project catalog")
 	public void catalogAdd(@Option(description = "Catalog name", required = true) String name,
 			@Option(description = "Catalog url", required = true) String url,
 			@Option(description = "Catalog description") String description,
@@ -189,7 +189,7 @@ public class ProjectCatalogCommands extends AbstractSpringCliCommands {
 		}
 	}
 
-	@Command(command = "remove", description = "Remove a project from a project catalog")
+	@Command(command = "remove", description = "Remove a project catalog")
 	public void catalogRemove(@Option(description = "Catalog name", required = true) String name) {
 		List<ProjectCatalog> originalProjectCatalogs = springCliUserConfig.getProjectCatalogs().getProjectCatalogs();
 		List<ProjectCatalog> updatedProjectCatalogs = originalProjectCatalogs.stream()

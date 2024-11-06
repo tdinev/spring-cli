@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cli.runtime.engine.actions.handlers;
 
+import java.io.File;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -49,8 +50,8 @@ public class GenerateHandlerTests {
 			Path helloPath = workingDir.resolve("hello.txt");
 			assertThat(helloPath).exists();
 			String tempDir = System.getProperty("java.io.tmpdir");
-			String expectedContents = "Hello World with Java 8 Root package com/example/restservice Temp dir "
-					+ tempDir;
+			String expectedContents = "Hello World with Java 17 Root package " + "com" + File.separatorChar + "example"
+					+ File.separatorChar + "restservice Temp dir " + tempDir;
 			assertThat(helloPath.toFile()).hasContent(expectedContents);
 
 		});

@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '3.2.3'
+	id 'org.springframework.boot' version '3.3.0'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 	id 'org.graalvm.buildtools.native' version '0.9.19' apply false
@@ -42,7 +42,7 @@ repositories {
 }
 
 ext {
-	set('springShellVersion', '3.2.2')
+	set('springShellVersion', '3.3.0')
 	set('initializrVersion', '0.11.1')
 	set('jarchivelibVersion', '1.2.0')
 	set('kohsukeVersion', '1.301')
@@ -76,7 +76,9 @@ dependencies {
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 	implementation 'org.rauschig:jarchivelib'
 	implementation 'org.kohsuke:github-api'
-	implementation 'org.gitlab4j:gitlab4j-api'
+	implementation ('org.gitlab4j:gitlab4j-api') {
+		exclude group: 'commons-logging', module: 'commons-logging'
+	}
 	implementation 'org.openrewrite:rewrite-java-17'
 	implementation 'org.openrewrite:rewrite-maven'
 	implementation 'org.openrewrite:rewrite-xml'
@@ -137,34 +139,26 @@ dependencyManagement {
 }
 
 test {
-	useJUnitPlatform()
-}
-
-sourceSets {
-	integrationTest {
-		java {
-			compileClasspath += main.output + test.output
-			runtimeClasspath += main.output + test.output
-			srcDir file('src/integrationTest/java')
+	useJUnitPlatform {
+		if (!project.hasProperty('cliIncludeTags') && !project.hasProperty('cliExcludeTags')) {
+			includeTags = ['none()']
 		}
-		resources.srcDir file('src/integrationTest/resources')
+		else {
+			if (project.hasProperty('cliIncludeTags') && cliIncludeTags.size() > 0) {
+				includeTags = cliIncludeTags.split(',')
+			}
+			if (project.hasProperty('cliExcludeTags') && cliExcludeTags.size() > 0) {
+				excludeTags = cliExcludeTags.split(',')
+			}
+		}
+
 	}
-}
-
-task integrationTest(type: Test) {
-	useJUnitPlatform()
-	testClassesDirs = sourceSets.integrationTest.output.classesDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
-}
-
-configurations {
-	integrationTestCompile.extendsFrom testCompile
-	integrationTestRuntime.extendsFrom testRuntime
-	integrationTestImplementation.extendsFrom testImplementation
-}
-
-rootProject.tasks.named("processIntegrationTestResources") {
-	duplicatesStrategy = 'include'
+	if (project.hasProperty('cliTestLogging') && (cliTestLogging.isEmpty() ? true : cliTestLogging.toBoolean())) {
+		testLogging {
+			showStandardStreams = true
+			events = ["standardOut", "started", "passed", "failed", "skipped"]
+		}
+	}
 }
 
 task generateGitProperties {
@@ -232,20 +226,14 @@ node {
 
 antora {
 	version = '3.2.0-alpha.2'
-	playbook = 'docs/cached-antora-playbook.yml'
-	playbookProvider {
-		repository = 'spring-projects-experimental/spring-cli'
-		branch = 'docs-build'
-		path = 'lib/antora/templates/per-branch-antora-playbook.yml'
-		checkLocalBranch = true
-	}
+	playbook = 'docs/antora-playbook.yml'
 	options = ['--clean', '--stacktrace']
 	dependencies = [
 		'@antora/atlas-extension': '1.0.0-alpha.1',
 		'@antora/collector-extension': '1.0.0-alpha.3',
 		'@asciidoctor/tabs': '1.0.0-beta.3',
 		'@opendevise/antora-release-line-extension': '1.0.0',
-		'@springio/antora-extensions': '1.8.0',
+		'@springio/antora-extensions': '1.8.1',
 		'@springio/asciidoctor-extensions': '1.0.0-alpha.9'
 	]
 }
@@ -265,23 +253,23 @@ if (project.hasProperty('cliRelease') && cliRelease.toBoolean()) {
 	jdks {
 		bellsoft17Osx {
 			platform = 'osx-x86_64'
-			url = 'https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-macos-amd64.tar.gz'
-			checksum = 'sha1/9cce19a8be85dcd3bd61df1e4a62aacccb6599ed'
+			url = 'https://download.bell-sw.com/java/17.0.11+12/bellsoft-jdk17.0.11+12-macos-amd64.tar.gz'
+			checksum = 'sha1/d3efd6dffba1ac2f52a2e18bfb4746ae2a009647'
 		}
 		bellsoft17OsxArm {
 			platform = 'osx-aarch64'
-			url = 'https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-macos-aarch64.tar.gz'
-			checksum = 'sha1/c2b82658fb2305aaabce6ec5bbc8f15093dee6dd'
+			url = 'https://download.bell-sw.com/java/17.0.11+12/bellsoft-jdk17.0.11+12-macos-aarch64.tar.gz'
+			checksum = 'sha1/3d296f04a92df152eeb4dca033efcb54e261425b'
 		}
 		bellsoft17Linux {
 			platform = 'linux-x86_64'
-			url = 'https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-linux-amd64.tar.gz'
-			checksum = 'sha1/af3de4524646058018c7b885b54f7606c5d0a592'
+			url = 'https://download.bell-sw.com/java/17.0.11+12/bellsoft-jdk17.0.11+12-linux-amd64.tar.gz'
+			checksum = 'sha1/40d606540c7017195513f7468041d42b55f3776c'
 		}
 		bellsoft17Windows {
 			platform = 'windows-x86_64'
-			url = 'https://download.bell-sw.com/java/17.0.9+11/bellsoft-jdk17.0.9+11-windows-amd64.zip'
-			checksum = 'sha1/c70350612b58dd0482b707955c0407d3250e8677'
+			url = 'https://download.bell-sw.com/java/17.0.11+12/bellsoft-jdk17.0.11+12-windows-amd64.zip'
+			checksum = 'sha1/40d3f7d474c8c98f24d65a1fa32e6a81a6eeef22'
 		}
 	}
 }
